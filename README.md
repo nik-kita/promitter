@@ -1,6 +1,5 @@
-# Project conventions:
----
-## NAMING:
-* Prefixes:
-    * I - interface `interface ICool { ... }`
-    * T - type `type TMessage = { ... }`
+# Promitter
+> This class provide a simple API for symbioses EventEmitter's and Promise's natures
+> Inspired by RXJS
+
+### Usage

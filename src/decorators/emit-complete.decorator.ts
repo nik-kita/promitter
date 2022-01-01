@@ -7,7 +7,7 @@ export function EmitComplete() {
     const { value: origin } = descriptor;
 
     descriptor.value = (label: string, cb: TOnCb) => {
-      origin.apply(target.constructor.prototype, label, cb);
+      origin.call(target.constructor.prototype, label, cb);
       
       if (label.includes(COMPLETE_PREFIX)) return;
 
