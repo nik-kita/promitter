@@ -6,12 +6,13 @@ export function EmitComplete() {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const { value: origin } = descriptor;
 
-    descriptor.value = (label: string, cb: TOnCb) => {
-      origin.call(target.constructor.prototype, label, cb);
+    descriptor.value = function(label: string, cb: TOnCb) {
+      origin.call(this, label, cb);
       
+
       if (label.includes(COMPLETE_PREFIX)) return;
 
-      target.emitter.emit(`${COMPLETE_PREFIX}${label}`)
+      (this as any).emitter.emit(`${COMPLETE_PREFIX}${label}`)
     }
 
     return descriptor;
