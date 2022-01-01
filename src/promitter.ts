@@ -10,6 +10,8 @@ import { TOnCb } from './types/on-cb.type';
  * const p = new Promitter<'open' | 'close' | 'success'>();
  */
 export class Promitter<TLabel extends string = string> {
+  private callbacksMap = new Map<string, TOnCb>();
+
   private emitter = new EventEmitter();
 
   public emit(label: TLabel, data?: any) {
@@ -25,25 +27,31 @@ export class Promitter<TLabel extends string = string> {
   }
 
   public once(label: TLabel, cb: TOnCb) {
-    this.emitter.once(label, (...args: any[]) => {
+    const _cb = (...args: any[]) => {
       cb(...args);
 
       if (label.includes(COMPLETE_PREFIX)) return;
 
       this.emitter.emit(COMPLETE_PREFIX + label);
-    });
+    };
+
+    this.callbacksMap.set(label + cb.toString(), _cb);
+    this.emitter.once(label, _cb);
 
     return this;
   }
 
   public on(label: TLabel, cb: TOnCb) {
-    this.emitter.on(label, (...args: any[]) => {
+    const _cb = (...args: any[]) => {
       cb(...args);
 
       if (label.includes(COMPLETE_PREFIX)) return;
 
       this.emitter.emit(COMPLETE_PREFIX + label);
-    });
+    };
+
+    this.callbacksMap.set(label + cb.toString(), _cb);
+    this.emitter.on(label, _cb);
 
     return this;
   }
@@ -87,8 +95,7 @@ export class Promitter<TLabel extends string = string> {
 
     if (cbs.length) {
       cbs.forEach((cb) => {
-        console.log(label, cb.toString());
-        this.emitter.removeListener(label, cb);
+        this.emitter.removeListener(label, this.callbacksMap.get(label + cb.toString()) || (() => {}));
       });
 
       return this;
