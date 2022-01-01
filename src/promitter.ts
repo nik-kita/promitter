@@ -52,7 +52,7 @@ export class Promitter<TLabel extends string = string> {
     });
   }
 
-  public emitAndWaitComplete(label: TLabel, data: unknown) {
+  public emitAndWaitComplete(label: TLabel, data?: unknown) {
     const waitComplete = new Promise<unknown>((resolve, reject) => {
       this
         .emitter
