@@ -23,22 +23,6 @@ export class Promitter<TLabel extends string = string> {
         : '';
   }
 
-  private getOriginalLabel(label: string) {
-    let splited = label.split(COMPLETE_PREFIX);
-
-    if (splited.length === 2) {
-      return splited[1];
-    }
-
-    splited = label.split(REJECT_PREFIX);
-
-    if (splited.length === 2) {
-      return splited[1];
-    }
-
-    return label;
-  }
-
   private compileAndSaveCb(label: string, cb: TOnCb) {  
     const cbType = this.getCbType(label);
     const _cb = (...args: any[]) => {
@@ -58,6 +42,9 @@ export class Promitter<TLabel extends string = string> {
     })();
 
     value[cbType] = _cb;
+
+    console.log(key);
+    console.log(value);
 
     return _cb;
   }
@@ -132,7 +119,11 @@ export class Promitter<TLabel extends string = string> {
         Object.entries(cbs).forEach(([prefix, value]) => {
           if (!value) return;
 
-          this.emitter.removeListener(prefix + label + cb.toString(), value);
+          const key = prefix + label + cb.toString();
+
+          console.log(key, value);
+
+          this.emitter.removeListener(key, value);
         });
       });
 
