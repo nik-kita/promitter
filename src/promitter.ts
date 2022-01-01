@@ -83,7 +83,7 @@ export class Promitter<TLabel extends string = string> {
     console.log('===');
     console.log(cbs[0].toString());
     console.log('===');
-    console.log(this.emitter.listenerCount)
+    console.log(this.emitter.listenerCount('message'));
     console.log('===');
     if (!label) {
       this.emitter.removeAllListeners();
