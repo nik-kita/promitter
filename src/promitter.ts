@@ -18,31 +18,15 @@ export class Promitter<TLabel extends string = string> {
 
   private emitter = new EventEmitter();
 
-  private getCbType(label: string): '' | typeof COMPLETE_PREFIX | typeof REJECT_PREFIX {
-    return label.includes(COMPLETE_PREFIX)
-      ? COMPLETE_PREFIX 
-      : label.includes(REJECT_PREFIX)
-        ? REJECT_PREFIX
-        : '';
-  }
-
-  private getLabelWithoutPrefixes(label: string) {
-    const splited = label.split(PREFIX_DELIMITER);
-    
-    return splited.length === 2
-      ? splited[1]
-      : label;
-    
-  }
 
   private compileAndSaveCb(label: string, cb: TOnCb) {  
-    const isOriginalCb = this.getCbType(label).length;
+    const isOriginalCb = label.split(PREFIX_DELIMITER).length === 1;
+    console.log('isOriginal', isOriginalCb);
     const _cb = (...args: any[]) => {
       cb(...args);
 
-
       if (!isOriginalCb) return;
-
+  
       this.emitter.emit(COMPLETE_PREFIX + label);
     };
 
@@ -58,6 +42,7 @@ export class Promitter<TLabel extends string = string> {
       return _childMap;
     })();
 
+    if (childKey.includes('message')) console.log('child key', childKey, _cb);
     childMap.set(childKey, _cb);
 
     return _cb;
@@ -129,14 +114,16 @@ export class Promitter<TLabel extends string = string> {
         const childKey = label + cb.toString();
         const childMap = this.listenersMap.get(label);
         
+        console.log('CHILDKEY', childKey);
         if (!childMap) return;
 
         const _cb = childMap.get(childKey);
 
+        console.log('_CB', _cb);
         if (!_cb) return;
 
         if (childMap.size === 1) {
-          ALL_PREFIXES.map((p) => p + label).forEach((l) => this.emitter.removeAllListeners(l)); 
+          ALL_PREFIXES.forEach((p) => this.emitter.removeAllListeners(p + label)); 
         }
 
         this.emitter.removeListener(label, _cb);
