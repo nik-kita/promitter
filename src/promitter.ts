@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
 import { ALL_PREFIXES, COMPLETE_PREFIX, REJECT_PREFIX } from './globals/emitter-prefixes.globals';
+import { TListenersMapValue } from './types/listeners-map-value.type';
 import { TOnCb } from './types/on-cb.type';
 
 /**
@@ -10,9 +11,56 @@ import { TOnCb } from './types/on-cb.type';
  * const p = new Promitter<'open' | 'close' | 'success'>();
  */
 export class Promitter<TLabel extends string = string> {
-  private callbacksMap = new Map<string, TOnCb>();
+  private listenersMap = new Map<string, TListenersMapValue>();
 
   private emitter = new EventEmitter();
+
+  private getCbType(label: string): '' | typeof COMPLETE_PREFIX | typeof REJECT_PREFIX {
+    return label.includes(COMPLETE_PREFIX)
+      ? COMPLETE_PREFIX 
+      : label.includes(REJECT_PREFIX)
+        ? REJECT_PREFIX
+        : '';
+  }
+
+  private getOriginalLabel(label: string) {
+    let splited = label.split(COMPLETE_PREFIX);
+
+    if (splited.length === 2) {
+      return splited[1];
+    }
+
+    splited = label.split(REJECT_PREFIX);
+
+    if (splited.length === 2) {
+      return splited[1];
+    }
+
+    return label;
+  }
+
+  private compileAndSaveCb(label: string, cb: TOnCb) {  
+    const cbType = this.getCbType(label);
+    const _cb = (...args: any[]) => {
+      cb(...args);
+
+
+      if (cbType === COMPLETE_PREFIX || cbType === REJECT_PREFIX) return;
+
+      this.emitter.emit(COMPLETE_PREFIX + label);
+    };
+    const key = label + cb.toString();
+    let value = this.listenersMap.get(key) ?? (() => {
+      const _value = {};
+      this.listenersMap.set(key, _value);
+  
+      return _value as TListenersMapValue;
+    })();
+
+    value[cbType] = _cb;
+
+    return _cb;
+  }
 
   public emit(label: TLabel, data?: any) {
     this.emitter.emit(label, data);
@@ -26,32 +74,16 @@ export class Promitter<TLabel extends string = string> {
     return this;
   }
 
+
   public once(label: TLabel, cb: TOnCb) {
-    const _cb = (...args: any[]) => {
-      cb(...args);
-
-      if (label.includes(COMPLETE_PREFIX)) return;
-
-      this.emitter.emit(COMPLETE_PREFIX + label);
-    };
-
-    this.callbacksMap.set(label + cb.toString(), _cb);
-    this.emitter.once(label, _cb);
+    
+    this.emitter.once(label, this.compileAndSaveCb(label, cb));
 
     return this;
   }
 
   public on(label: TLabel, cb: TOnCb) {
-    const _cb = (...args: any[]) => {
-      cb(...args);
-
-      if (label.includes(COMPLETE_PREFIX)) return;
-
-      this.emitter.emit(COMPLETE_PREFIX + label);
-    };
-
-    this.callbacksMap.set(label + cb.toString(), _cb);
-    this.emitter.on(label, _cb);
+    this.emitter.on(label, this.compileAndSaveCb(label, cb));
 
     return this;
   }
@@ -59,11 +91,10 @@ export class Promitter<TLabel extends string = string> {
   public wait<T = unknown>(label: TLabel) {
     return new Promise<T>((resolve, reject) => {
       this
-        .emitter
         .once(label, (data: T) => {
           resolve(data);
         })
-        .once(REJECT_PREFIX + label, (data: unknown) => {
+        .once((REJECT_PREFIX + label as any), (data: unknown) => {
           reject(data);
         });
     });
@@ -72,11 +103,10 @@ export class Promitter<TLabel extends string = string> {
   public emitAndWaitComplete<T = unknown>(label: TLabel, data?: unknown) {
     const waitComplete = new Promise<T>((resolve, reject) => {
       this
-        .emitter
-        .once(COMPLETE_PREFIX + label, (_data: T) => {
+        .once((COMPLETE_PREFIX + label as any), (_data: T) => {
           resolve(_data);
         })
-        .once(REJECT_PREFIX + label, (_data: unknown) => {
+        .once((REJECT_PREFIX + label as any), (_data: unknown) => {
           reject(_data);
         });
     });
@@ -95,7 +125,15 @@ export class Promitter<TLabel extends string = string> {
 
     if (cbs.length) {
       cbs.forEach((cb) => {
-        this.emitter.removeListener(label, this.callbacksMap.get(label + cb.toString()) || (() => {}));
+        const cbs = this.listenersMap.get(label + cb.toString());
+
+        if (!cbs) return;
+
+        Object.entries(cbs).forEach(([prefix, value]) => {
+          if (!value) return;
+
+          this.emitter.removeListener(prefix + label + cb.toString(), value);
+        });
       });
 
       return this;
