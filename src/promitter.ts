@@ -52,11 +52,11 @@ export class Promitter<TLabel extends string = string> {
     });
   }
 
-  public emitAndWaitComplete(label: TLabel, data?: unknown) {
-    const waitComplete = new Promise<unknown>((resolve, reject) => {
+  public emitAndWaitComplete<T = unknown>(label: TLabel, data?: unknown) {
+    const waitComplete = new Promise<T>((resolve, reject) => {
       this
         .emitter
-        .once(COMPLETE_PREFIX + label, (_data: unknown) => {
+        .once(COMPLETE_PREFIX + label, (_data: T) => {
           resolve(_data);
         })
         .once(REJECT_PREFIX + label, (_data: unknown) => {
@@ -65,5 +65,7 @@ export class Promitter<TLabel extends string = string> {
     });
 
     this.emitter.emit(label, data)
+
+    return waitComplete;
   }
 }
