@@ -21,7 +21,6 @@ export class Promitter<TLabel extends string = string> {
 
   private compileAndSaveCb(label: string, cb: TOnCb) {  
     const isOriginalCb = label.split(PREFIX_DELIMITER).length === 1;
-    console.log('isOriginal', isOriginalCb);
     const _cb = (...args: any[]) => {
       cb(...args);
 
@@ -41,11 +40,6 @@ export class Promitter<TLabel extends string = string> {
   
       return _childMap;
     })();
-
-    if (childKey.includes('message')){
-      console.log('child key', childKey);
-      console.log('_cb', _cb.toString());
-    } 
 
     childMap.set(childKey, _cb);
 
@@ -118,12 +112,10 @@ export class Promitter<TLabel extends string = string> {
         const childKey = label + cb.toString();
         const childMap = this.listenersMap.get(label);
         
-        console.log('CHILDKEY', childKey);
         if (!childMap) return;
 
         const _cb = childMap.get(childKey);
 
-        console.log('_CB', _cb?.toString());
         if (!_cb) return;
 
         if (childMap.size === 1) {
