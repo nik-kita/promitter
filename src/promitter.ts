@@ -122,7 +122,6 @@ export class Promitter<TLabel extends string = string> {
           const key = prefix + label + cb.toString();
 
           console.log(key, value);
-
           this.emitter.removeListener(key, value);
         });
       });
