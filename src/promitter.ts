@@ -15,23 +15,23 @@ export class Promitter<TLabel extends string = string> {
 
   public emit(label: TLabel, data?: any) {
     this.emitter.emit(label, data);
-    
+
     return this;
   }
-  
+
   public emitReject(label: TLabel, data?: any) {
     this.emitter.emit(REJECT_PREFIX + label, data);
-    
+
     return this;
   }
-  
+
   @EmitComplete()
   public once(label: TLabel, cb: TOnCb) {
     this.emitter.once(label, cb);
 
     return this;
   }
-  
+
   @EmitComplete()
   public on(label: TLabel, cb: TOnCb) {
     this.emitter.on(label, cb);
@@ -69,12 +69,24 @@ export class Promitter<TLabel extends string = string> {
     return waitComplete;
   }
 
-  public rmListeners(label?:TLabel) {
-    if (label) {
-      this.emitter.removeAllListeners(label);
-      ALL_PREFIXES.forEach((prefix) => this.emitter.removeAllListeners(prefix + label));    
-    } else {
+  public rmListeners(label?: TLabel, cbs: TOnCb[] = []) {
+    if (!label) {
       this.emitter.removeAllListeners();
+
+      return this;
     }
+
+    if (cbs.length) {
+      cbs.forEach((cb) => {
+        this.emitter.removeListener(label, cb);
+      });
+
+      return this;
+    }
+
+    this.emitter.removeAllListeners(label);
+    ALL_PREFIXES.forEach((prefix) => this.emitter.removeAllListeners(prefix + label));
+
+    return this;
   }
 }
