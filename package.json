@@ -32,5 +32,8 @@
     "emitter",
     "promise",
     "typescript"
-  ]
+  ],
+  "dependencies": {
+    "@nik-kita/promitter": "^1.0.4"
+  }
 }

@@ -28,11 +28,15 @@ export class Promitter<TLabel extends string = string> {
   @EmitComplete()
   public once(label: TLabel, cb: TOnCb) {
     this.emitter.once(label, cb);
+
+    return this;
   }
   
   @EmitComplete()
   public on(label: TLabel, cb: TOnCb) {
     this.emitter.on(label, cb);
+
+    return this;
   }
 
   public wait<T = unknown>(label: TLabel) {
@@ -48,16 +52,18 @@ export class Promitter<TLabel extends string = string> {
     });
   }
 
-  public emitAndWaitComplete<T = unknown>(label: TLabel) {
-    const waitComplete = new Promise((resolve, reject) => {
+  public emitAndWaitComplete(label: TLabel, data: unknown) {
+    const waitComplete = new Promise<unknown>((resolve, reject) => {
       this
         .emitter
-        .once(COMPLETE_PREFIX + label, (data: T) => {
-          resolve(data);
+        .once(COMPLETE_PREFIX + label, (_data: unknown) => {
+          resolve(_data);
         })
-        .once(REJECT_PREFIX + label, (data: unknown) => {
-          reject(data);
+        .once(REJECT_PREFIX + label, (_data: unknown) => {
+          reject(_data);
         });
     });
+
+    this.emitter.emit(label, data)
   }
 }
