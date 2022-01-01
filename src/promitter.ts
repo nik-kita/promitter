@@ -1,6 +1,5 @@
 import EventEmitter from 'events';
 import { ALL_PREFIXES, COMPLETE_PREFIX, PREFIX_DELIMITER, REJECT_PREFIX } from './globals/emitter-prefixes.globals';
-import { TListenersMapValue } from './types/listeners-map-value.type';
 import { TOnCb } from './types/on-cb.type';
 
 /**
@@ -11,7 +10,11 @@ import { TOnCb } from './types/on-cb.type';
  * const p = new Promitter<'open' | 'close' | 'success'>();
  */
 export class Promitter<TLabel extends string = string> {
-  private listenersMap = new Map<string, TListenersMapValue>();
+  /**
+   * JSON pseudo representation of listenersMap:
+   *   { label: { uniqueLabel: TOnCb } }
+   */
+  private listenersMap = new Map<string, Map<string, TOnCb>>();
 
   private emitter = new EventEmitter();
 
@@ -33,28 +36,29 @@ export class Promitter<TLabel extends string = string> {
   }
 
   private compileAndSaveCb(label: string, cb: TOnCb) {  
-    const cbType = this.getCbType(label);
+    const isOriginalCb = this.getCbType(label).length;
     const _cb = (...args: any[]) => {
       cb(...args);
 
 
-      if (cbType === COMPLETE_PREFIX || cbType === REJECT_PREFIX) return;
+      if (!isOriginalCb) return;
 
       this.emitter.emit(COMPLETE_PREFIX + label);
     };
-    const originalLabel = this.getLabelWithoutPrefixes(label);
-    const key = originalLabel + cb.toString();
-    let value = this.listenersMap.get(key) ?? (() => {
-      const _value = {};
-      this.listenersMap.set(key, _value);
+
+    if (!isOriginalCb) return cb;
+
+    const childKey = label + cb.toString();
+
+    let childMap = this.listenersMap.get(label) ?? (() => {
+      const _childMap = new Map<string, TOnCb>();
+      
+      this.listenersMap.set(label, _childMap);
   
-      return _value as TListenersMapValue;
+      return _childMap;
     })();
 
-    value[cbType] = _cb;
-
-    console.log('KEY:', key);
-    console.log('VALUE:', value);
+    childMap.set(childKey, _cb);
 
     return _cb;
   }
@@ -122,20 +126,23 @@ export class Promitter<TLabel extends string = string> {
 
     if (cbs.length) {
       cbs.forEach((cb) => {
-        console.log('label + cb.ToString():', label + cb.toString())
-        const cbs = this.listenersMap.get(label + cb.toString());
-        console.log('CBS:', cbs);
+        const childKey = label + cb.toString();
+        const childMap = this.listenersMap.get(label);
+        
+        if (!childMap) return;
 
-        if (!cbs) return;
+        const _cb = childMap.get(childKey);
 
-        Object.entries(cbs).forEach(([prefix, value]) => {
-          if (!value) return;
+        if (!_cb) return;
 
-          const key = prefix + label + cb.toString();
+        if (childMap.size === 1) {
+          ALL_PREFIXES.map((p) => p + label).forEach((l) => this.emitter.removeAllListeners(l)); 
+        }
 
-          console.log(key, value);
-          this.emitter.removeListener(key, value);
-        });
+        this.emitter.removeListener(label, _cb);
+        
+
+        childMap.delete(childKey);
       });
 
       return this;
