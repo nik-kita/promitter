@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { ALL_PREFIXES, COMPLETE_PREFIX, REJECT_PREFIX } from './globals/emitter-prefixes.globals';
+import { ALL_PREFIXES, COMPLETE_PREFIX, PREFIX_DELIMITER, REJECT_PREFIX } from './globals/emitter-prefixes.globals';
 import { TListenersMapValue } from './types/listeners-map-value.type';
 import { TOnCb } from './types/on-cb.type';
 
@@ -23,6 +23,15 @@ export class Promitter<TLabel extends string = string> {
         : '';
   }
 
+  private getLabelWithoutPrefixes(label: string) {
+    const splited = label.split(PREFIX_DELIMITER);
+    
+    return splited.length === 2
+      ? splited[1]
+      : label;
+    
+  }
+
   private compileAndSaveCb(label: string, cb: TOnCb) {  
     const cbType = this.getCbType(label);
     const _cb = (...args: any[]) => {
@@ -33,7 +42,8 @@ export class Promitter<TLabel extends string = string> {
 
       this.emitter.emit(COMPLETE_PREFIX + label);
     };
-    const key = label + cb.toString();
+    const originalLabel = this.getLabelWithoutPrefixes(label);
+    const key = originalLabel + cb.toString();
     let value = this.listenersMap.get(key) ?? (() => {
       const _value = {};
       this.listenersMap.set(key, _value);
