@@ -1,5 +1,4 @@
 import EventEmitter from 'events';
-import { EmitComplete } from './decorators/emit-complete.decorator';
 import { ALL_PREFIXES, COMPLETE_PREFIX, REJECT_PREFIX } from './globals/emitter-prefixes.globals';
 import { TOnCb } from './types/on-cb.type';
 
@@ -25,16 +24,26 @@ export class Promitter<TLabel extends string = string> {
     return this;
   }
 
-  @EmitComplete()
   public once(label: TLabel, cb: TOnCb) {
-    this.emitter.once(label, cb);
+    this.emitter.once(label, (...args: any[]) => {
+      cb(...args);
+
+      if (label.includes(COMPLETE_PREFIX)) return;
+
+      this.emitter.emit(COMPLETE_PREFIX + label);
+    });
 
     return this;
   }
 
-  @EmitComplete()
   public on(label: TLabel, cb: TOnCb) {
-    this.emitter.on(label, cb);
+    this.emitter.on(label, (...args: any[]) => {
+      cb(...args);
+
+      if (label.includes(COMPLETE_PREFIX)) return;
+
+      this.emitter.emit(COMPLETE_PREFIX + label);
+    });
 
     return this;
   }
@@ -64,7 +73,7 @@ export class Promitter<TLabel extends string = string> {
         });
     });
 
-    this.emitter.emit(label, data)
+    this.emit(label, data)
 
     return waitComplete;
   }
