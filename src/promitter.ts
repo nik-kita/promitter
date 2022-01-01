@@ -43,8 +43,8 @@ export class Promitter<TLabel extends string = string> {
 
     value[cbType] = _cb;
 
-    console.log(key);
-    console.log(value);
+    console.log('KEY:', key);
+    console.log('VALUE:', value);
 
     return _cb;
   }
@@ -112,8 +112,9 @@ export class Promitter<TLabel extends string = string> {
 
     if (cbs.length) {
       cbs.forEach((cb) => {
-        console.log(label + cb.toString())
+        console.log('label + cb.ToString():', label + cb.toString())
         const cbs = this.listenersMap.get(label + cb.toString());
+        console.log('CBS:', cbs);
 
         if (!cbs) return;
 
