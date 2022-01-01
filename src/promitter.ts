@@ -73,7 +73,7 @@ export class Promitter<TLabel extends string = string> {
         });
     });
 
-    this.emit(label, data)
+    this.emitter.emit(label, data)
 
     return waitComplete;
   }
