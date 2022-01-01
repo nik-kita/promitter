@@ -80,7 +80,7 @@ export class Promitter<TLabel extends string = string> {
 
   public rmListeners(label?: TLabel, cbs: TOnCb[] = []) {
     console.log(label);
-    console.log(cbs);
+    console.log(cbs[0].toString());
     if (!label) {
       this.emitter.removeAllListeners();
 
