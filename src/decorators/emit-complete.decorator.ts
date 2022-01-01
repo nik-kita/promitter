@@ -7,12 +7,14 @@ export function EmitComplete() {
     const { value: origin } = descriptor;
 
     descriptor.value = function(label: string, cb: TOnCb) {
-      origin.call(this, label, cb);
+      const result = origin.call(this, label, cb);
       
 
       if (label.includes(COMPLETE_PREFIX)) return;
 
       (this as any).emitter.emit(`${COMPLETE_PREFIX}${label}`)
+
+      return result;
     }
 
     return descriptor;
