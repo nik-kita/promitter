@@ -112,6 +112,7 @@ export class Promitter<TLabel extends string = string> {
 
     if (cbs.length) {
       cbs.forEach((cb) => {
+        console.log(label + cb.toString())
         const cbs = this.listenersMap.get(label + cb.toString());
 
         if (!cbs) return;
