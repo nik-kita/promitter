@@ -80,7 +80,9 @@ export class Promitter<TLabel extends string = string> {
 
   public rmListeners(label?: TLabel, cbs: TOnCb[] = []) {
     console.log(label);
+    console.log('===');
     console.log(cbs[0].toString());
+    console.log('===');
     if (!label) {
       this.emitter.removeAllListeners();
 
