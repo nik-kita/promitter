@@ -87,6 +87,7 @@ export class Promitter<TLabel extends string = string> {
 
     if (cbs.length) {
       cbs.forEach((cb) => {
+        console.log(label, cb.toString());
         this.emitter.removeListener(label, cb);
       });
 
