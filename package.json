@@ -1,10 +1,12 @@
 {
-  "name": "promitter",
+  "name": "@nik-kita/promitter",
   "version": "1.0.0",
-  "description": "",
+  "description": "--- ## NAMING: * Prefixes:     * I - interface `interface ICool { ... }`     * T - type `type TMessage = { ... }`",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "prepublish": "tsc",
     "build": "npx tsc -p tsconfig.json",
@@ -25,5 +27,10 @@
   "devDependencies": {
     "@types/node": "^17.0.5",
     "typescript": "^4.5.4"
-  }
+  },
+  "keywords": [
+    "emitter",
+    "promise",
+    "typescript"
+  ]
 }
