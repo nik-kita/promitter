@@ -2,9 +2,15 @@
   "name": "promitter",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist/**/*"],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublish": "tsc",
+    "build": "npx tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "version": "git add -A src",
+    "postversion": "git push"
   },
   "repository": {
     "type": "git",
