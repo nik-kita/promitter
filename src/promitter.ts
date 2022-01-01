@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import { EmitComplete } from './decorators/emit-complete.decorator';
-import { COMPLETE_PREFIX, REJECT_PREFIX } from './globals/emitter-prefixes.globals';
+import { ALL_PREFIXES, COMPLETE_PREFIX, REJECT_PREFIX } from './globals/emitter-prefixes.globals';
 import { TOnCb } from './types/on-cb.type';
 
 /**
@@ -67,5 +67,14 @@ export class Promitter<TLabel extends string = string> {
     this.emitter.emit(label, data)
 
     return waitComplete;
+  }
+
+  public rmListeners(label?:TLabel) {
+    if (label) {
+      this.emitter.removeAllListeners(label);
+      ALL_PREFIXES.forEach((prefix) => this.emitter.removeAllListeners(prefix + label));    
+    } else {
+      this.emitter.removeAllListeners();
+    }
   }
 }
