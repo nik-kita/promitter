@@ -43,8 +43,8 @@ export class Promitter<TLabel extends string = string> {
     })();
 
     if (childKey.includes('message')){
-      console.log('child key');
-      console.log('_cb', _cb);
+      console.log('child key', childKey);
+      console.log('_cb', _cb.toString());
     } 
 
     childMap.set(childKey, _cb);
