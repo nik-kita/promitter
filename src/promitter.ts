@@ -42,7 +42,11 @@ export class Promitter<TLabel extends string = string> {
       return _childMap;
     })();
 
-    if (childKey.includes('message')) console.log('child key', childKey, _cb);
+    if (childKey.includes('message')){
+      console.log('child key');
+      console.log('_cb', _cb);
+    } 
+
     childMap.set(childKey, _cb);
 
     return _cb;
@@ -119,7 +123,7 @@ export class Promitter<TLabel extends string = string> {
 
         const _cb = childMap.get(childKey);
 
-        console.log('_CB', _cb);
+        console.log('_CB', _cb?.toString());
         if (!_cb) return;
 
         if (childMap.size === 1) {
