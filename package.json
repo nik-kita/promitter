@@ -1,6 +1,6 @@
 {
   "name": "@nik-kita/promitter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "--- ## NAMING: * Prefixes:     * I - interface `interface ICool { ... }`     * T - type `type TMessage = { ... }`",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
