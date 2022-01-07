@@ -18,6 +18,8 @@ export class Promitter<TLabel extends string = string> {
 
   private emitter = new EventEmitter();
 
+  private completedSet = new Set<string>();
+
 
   private compileAndSaveCb(label: string, cb: TOnCb) {  
     const isOriginalCb = label.split(PREFIX_DELIMITER).length === 1;
@@ -27,6 +29,7 @@ export class Promitter<TLabel extends string = string> {
       if (!isOriginalCb) return;
   
       this.emitter.emit(COMPLETE_PREFIX + label);
+      this.completedSet.add(label);
     };
 
     if (!isOriginalCb) return cb;
@@ -72,7 +75,9 @@ export class Promitter<TLabel extends string = string> {
     return this;
   }
 
-  public wait<T = unknown>(label: TLabel) {
+  public wait<T = unknown>(label: TLabel, resolveIfWasInPast: boolean = false) {
+    if (resolveIfWasInPast && this.completedSet.has(label)) return Promise.resolve();
+
     return new Promise<T>((resolve, reject) => {
       this
         .once(label, (data: T) => {
@@ -84,7 +89,9 @@ export class Promitter<TLabel extends string = string> {
     });
   }
 
-  public emitAndWaitComplete<T = unknown>(label: TLabel, data?: unknown) {
+  public emitAndWaitComplete<T = unknown>(label: TLabel, data?: unknown, resolveIfWasInPast: boolean = false) {
+    if (resolveIfWasInPast && this.completedSet.has(label)) return Promise.resolve();
+
     const waitComplete = new Promise<T>((resolve, reject) => {
       this
         .once((COMPLETE_PREFIX + label as any), (_data: T) => {
@@ -133,6 +140,12 @@ export class Promitter<TLabel extends string = string> {
 
     this.emitter.removeAllListeners(label);
     ALL_PREFIXES.forEach((prefix) => this.emitter.removeAllListeners(prefix + label));
+
+    return this;
+  }
+
+  public resetCompleted() {
+    this.completedSet.clear();
 
     return this;
   }

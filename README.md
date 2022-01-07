@@ -3,6 +3,16 @@
 > This class provide a simple API for symbioses EventEmitter's and Promise's natures
 > Inspired by RXJS
 
+## Updates
+__wait()__ and __emitAndWaitComplete__ has additional optional parameter _resolveIfWasInPast__:boolean = false
+Default behavior is like in previous versions.
+Behavior for __true__ value:
+If event on which first emittion you want resolve your promise was emitted before this waiting - it will be resolve instansly.
+Why it may be needed?
+Example - wait on Socket connection. But if connection is already open you will be resolve even if hang this promise after it;
+__P. S.__
+You may clean all memory about past completed mimimum one time events by calling '__resetCompleted()__' method.
+
 ## Declaration:
 
 **`Promitter<TLabel extends string = string>`**
