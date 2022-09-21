@@ -1,4 +1,5 @@
-# Promitter
+# Promitter 
+## \[For this moment it is an amateur library, use it on your own risk..]
 
 > This class provide a simple API for symbioses EventEmitter's and Promise's natures
 > Inspired by RXJS
