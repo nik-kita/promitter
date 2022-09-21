@@ -65,7 +65,7 @@ You may clean all memory about past completed mimimum one time events by calling
 
 ## Usage example with Socket:
 
-```
+```ts
 import Ws, { WebSocket } from 'ws';
 import Promitter from '@nik-kita/promitter';
 
